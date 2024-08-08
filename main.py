@@ -2,10 +2,13 @@ from bs4 import BeautifulSoup
 import requests
 import pandas
 from time import sleep
+import os
 
-# PART 1
+# PART 1 - Scrapping data and saving to all_data.csv 
+# NOTE: data has been already scrapped (as of August 2024) and included in repository.
+# You can comment out PART 1 and use already scrapped data for PART 2
 
-# Send a GET request to the web page with a user-agent string
+# Use headers to appear as a regular browser. Better use with VPN in case your IP is flagged
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
@@ -15,6 +18,7 @@ headers = {
     'Connection': 'keep-alive'
 }
 
+# create empty dictionary that will be filled with scrapped data
 data_dict = {
     'rank': [],
     'major': [],
@@ -24,6 +28,7 @@ data_dict = {
     'percent high meaning': [],
 }
 
+# Loop through 32 pages of PayScale's table on website
 page = 0
 while page < 33:
     sleep(5)
@@ -33,6 +38,7 @@ while page < 33:
     soup = BeautifulSoup(web_page, "html.parser")
     all_values = soup.find_all(name="span", class_='data-table__value')
 
+    # based on the index in all_values group values according to their column names
     i = 0
     for value in all_values:
         print(value.get_text())
@@ -56,12 +62,19 @@ while page < 33:
         if i == 6:
             i = 0
 
-print(data_dict)
+# print(data_dict)
+
 all_data = pandas.DataFrame(data_dict)
-all_data.to_csv('all_data.csv')
+# Check if the file exists
+if os.path.exists('all_data.csv'):
+    print("File already exists.")
+else:
+    # Save the DataFrame to a CSV file
+    all_data.to_csv('all_data.csv')
 
-# PART 2
+# PART 2 - pulling and viewing data from the all_data.csv
 
+# If you want to use already scrapped data and PART 1 is commented out, uncomment line 78 to fetch data
 # all_data = pandas.read_csv('all_data.csv')
 
 # Make adjustments to the table - delete first column with redundant numbers and add 'spread' column
